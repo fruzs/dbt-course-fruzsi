@@ -1,0 +1,59 @@
+
+version: 2
+
+models:
+  - name: address
+    description: "One row per address of the user or order"
+    columns:
+      - name: address_id
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
+  - name: event
+    description: "One row per event on the Greenery webshop"
+    columns:
+      - name: event_id
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
+  - name: order
+    description: "One row per order placed on the Greenery webshop"
+    columns:
+      - name: order_id
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
+  - name: order_item
+    description: "One row per order item of an order placed on the Greenery webshop"
+    tests:
+    - dbt_utils.unique_combination_of_columns:
+        combination_of_columns:
+          - order_id
+          - product_id
+  - name: product
+    description: "One row per product on the Greenery webshop"
+    columns:
+      - name: product_id
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
+  - name: promo
+    description: "One promotion per row on the Greenery webshop"
+    columns:
+      - name: promo_id
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
+  - name: user
+    description: "One row per user created on the Greenery webshop"
+    columns:
+      - name: user_id
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
