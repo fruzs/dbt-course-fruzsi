@@ -2,15 +2,29 @@
 version: 2
 
 models:
-  - name: address
-    description: "One row per address of the user or order"
+  - name: stg_address
+    description: "One row per address of the user that placed an order"
     columns:
       - name: address_id
         description: "The primary key for this table"
         tests:
           - unique
           - not_null
-  - name: event
+      - name: address
+        description: "Contains the street and housenumber of the user an order."
+        tests:
+          - not_null
+      - name: zipcode
+        description: "The zipcode where the adress is located."
+        tests:
+          - not_null
+      - name: state
+        description: "The state where the address is located."
+        tests: 
+          - not_null
+      - name: country
+        description: "The country where the address is located"
+  - name: stg_event_log
     description: "One row per event on the Greenery webshop"
     columns:
       - name: event_id
@@ -18,7 +32,27 @@ models:
         tests:
           - unique
           - not_null
-  - name: order
+      - name: event_created_at
+        description: "The timestamp of the event"
+      - name: session_id
+        description: "The identifier of a session of the event"
+        tests: 
+          - not_null
+      - name: user_id
+        description: "The id of the user that triggered the event"
+        tests:
+          - not_null
+      - name: page_url
+        description: "The url where the event was captured"
+        tests:
+          - not_null
+      - name: event_type
+        description: "The type of the event, one in: page_view, package_shipped, delete_from_cart, checkout, add_to_cart and account_created"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['page_view', 'package_shipped', 'delete_from_cart', 'checkout', 'add_to_cart','account_created']
+  - name: stg_order
     description: "One row per order placed on the Greenery webshop"
     columns:
       - name: order_id
@@ -26,20 +60,95 @@ models:
         tests:
           - unique
           - not_null
-  - name: order_item
+      - name: order_created_at
+        description: "The timestamp when the order was placed"
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'IS NULL'
+              condition: order_status = 'pending'
+      - name: user_id
+        description: "The identifier of the user that placed the order"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_user')
+              field: user_id
+      - name: promo_id
+        description: "The id of the promotion if it is used at checkout"
+        tests:
+          - relationships:
+              to: ref('stg_promo')
+              field: promo_id
+      - name: address_id
+        description: "The id of the user that placed the order"
+        tests:
+          - relationships:
+              to: ref('stg_address')
+              field: address_id
+          - not_null
+      - name: order_status
+        description: "The current status of the order"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['shipped', 'pending', 'preparing', 'delivered']
+      - name: order_cost
+        description: "Order amount without shipping costs"
+        tests:
+          - not_null
+      - name: shipping_cost
+        description: "How much the user pays for the shipping"
+        tests:
+        - not_null
+      - name: order_total
+        description: "How much the user pays for the order and shipping together"
+        tests:
+        - not_null
+      - name: tracking_id
+        description: "Order shipment tracking id"
+        tests:
+          - dbt_utils.not_null_where:
+              where: "order_status NOT IN ('pending', 'preparing')"
+      - name: shipping_service
+        description: "The shipping service"
+        tests:
+          - dbt_utils.not_null_where:
+              where: "order_status NOT IN ('pending', 'preparing')"
+          - accepted_values:
+              values: ['fedex', 'ups', 'dhl', 'usps', NULL]
+      - name: estimated_delivery_at
+        description: "When the order expected to be delivered"
+      - name: delivered_at
+        description: "WHen the order was delivered"
+  - name: stg_order_item
     description: "One row per order item of an order placed on the Greenery webshop"
     tests:
     - dbt_utils.unique_combination_of_columns:
         combination_of_columns:
           - order_id
           - product_id
-  - name: product
+    columns:
+      - name: order_id
+        description: "The identifier of the order the order item belongs tog"
+      - name: product_id
+        description: "The idenfier of the product the order item holds"
+      - name: order_item_quantity
+        description: "The amount of product the order has"
+  - name: stg_product
     description: "One row per product on the Greenery webshop"
     columns:
       - name: product_id
         description: "The primary key for this table"
         tests:
           - unique
+          - not_null
+      - name: product_name
+        description: "The name of the product"
+        tests:
+          - not_null
+      - name: stock_quantity 
+        description: "The amount of products available in stock"
+        tests:
           - not_null
   - name: promo
     description: "One promotion per row on the Greenery webshop"
@@ -49,6 +158,12 @@ models:
         tests:
           - unique
           - not_null
+      - name: discount
+        descripiton: "The percentage applied as discount with the promotion"
+        tests:
+          - not_null
+      - name: promo_status
+        description: "The status of the promotion"
   - name: user
     description: "One row per user created on the Greenery webshop"
     columns:
@@ -56,4 +171,32 @@ models:
         description: "The primary key for this table"
         tests:
           - unique
+          - not_null
+      - name: first_name
+        description: "The first name of the user"
+        tests:
+          - not_null
+      - name: last_name
+        description: "The last name of the user"
+        tests:
+          - not_null
+      - name: email
+        description: "The email of the user"
+        tests:
+          - not_null
+      - name: phone_number
+        description: "The phone number of the user"
+        tests:
+          - not_null
+      - name: user_created_at
+        description:  "The timestamp of the user created"
+        tests:
+          - not_null
+      - name: user_updated_at
+        description:  "The timestamp of the last update to the user"
+        tests:
+          - not_null
+      - name: address_id
+        description: "The identifier of the user's adress"
+        tests:
           - not_null
