@@ -107,13 +107,15 @@ models:
       - name: tracking_id
         description: "Order shipment tracking id"
         tests:
-          - dbt_utils.not_null_where:
-              where: "order_status NOT IN ('pending', 'preparing')"
+          - not_null:
+              config:
+                where: "order_status NOT IN ('pending', 'preparing')"
       - name: shipping_service
         description: "The shipping service"
         tests:
-          - dbt_utils.not_null_where:
-              where: "order_status NOT IN ('pending', 'preparing')"
+          - not_null:
+              config:
+                where: "order_status NOT IN ('pending', 'preparing')"
           - accepted_values:
               values: ['fedex', 'ups', 'dhl', 'usps', NULL]
       - name: estimated_delivery_at
@@ -150,7 +152,7 @@ models:
         description: "The amount of products available in stock"
         tests:
           - not_null
-  - name: promo
+  - name: stg_promo
     description: "One promotion per row on the Greenery webshop"
     columns:
       - name: promo_id
@@ -164,7 +166,7 @@ models:
           - not_null
       - name: promo_status
         description: "The status of the promotion"
-  - name: user
+  - name: stg_user
     description: "One row per user created on the Greenery webshop"
     columns:
       - name: user_id
