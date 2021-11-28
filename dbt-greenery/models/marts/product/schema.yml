@@ -1,0 +1,26 @@
+
+version: 2
+
+models:
+  - name: fct_page_view
+    description: "One row per page view event on the Greenery webshop"
+    columns:
+      - name: event_id
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
+      - name: event_created_at
+        description: "The timestamp of the event"
+      - name: session_id
+        description: "The identifier of a session of the event"
+        tests: 
+          - not_null
+      - name: user_id
+        description: "The id of the user that triggered the event"
+        tests:
+          - not_null
+      - name: page_url
+        description: "The url where the event was captured"
+        tests:
+          - not_null

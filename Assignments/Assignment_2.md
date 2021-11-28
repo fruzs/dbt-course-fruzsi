@@ -11,9 +11,10 @@ FROM stg_user as u
 LEFT JOIN stg_order as o USING(user_id)
 GROUP BY 1)
 SELECT SUM(CASE WHEN order_count>1 THEN 1 ELSE 0 END)/COUNT(user_id)::float
-FROM base ```
+FROM base 
+```
 
-THe repeat rate is ~ 80%
+The repeat rate is ~ 80%
 
 What are good indicators of a user who will likely purchase again? What about indicators of users who are likely NOT to purchase again? If you had more data, what features would you want to look into to answer this question?
 
@@ -21,25 +22,32 @@ What are good indicators of a user who will likely purchase again? What about in
 - If they used promo code or have unused promo code
 - Weather: when it s nicer out theymight be more likely to spend time with gardening.
 
-More stakeholders are coming to us for data, which is great! But we need to get some more models created before we can help. Create a marts folder, so we can organize our models, with the following subfolders for business units:
-
-Core:
-dim_product: The product dimension, containing name and id
-dim_user: Containing the not sensitive information around the user and address
-fct_order: The basic facts around the order
-Marketing
-Product
-Within each marts folder, create at least 1-2 intermediate models and 1-2 dimension/fact models.
 
 
-Explain the marts models you added. Why did you organize the models in the way you did?
-Use the dbt docs to visualize your model DAGs to ensure the model layers make sense
-Paste in an image of your DAG from the docs
+
+### Core:
+- dim_product: The product dimension, containing name and id
+- dim_user: Containing the not sensitive information around the user and address
+- dim_order: Basic dimensions of the order
+- fct_order: The basic facts around the order
+- fct_product_stock_daily: This table shows what s the status of the stock each day when there are orders happening
+- int_sold_product_daily: is an intermediate table to calculate how much product is sold on daily level
+
+### Marketing:
+- dim_promo: The basic dimensions of a promotion
+- fct_promo_usage: Calculates how many orders the promotion is used per day, which can indicate the success of the marketing campaign
+- fct_user_order: Calculates how many orders a user has, how long it takes for the first order after user creation and also how many revenue the orders generate
+
+### Product
+- fct_page_views: how many pageviews happen on the website
 
 
-(Part 2) Tests
-We added some more models and transformed some data! Now we need to make sure they’re accurately reflecting the data. Add dbt tests into your dbt project on your existing models from Week 1, and new models from the section above
-What assumptions are you making about each model? (i.e. why are you adding each test?)
-Did you find any “bad” data as you added and ran tests on your models? How did you go about either cleaning the data in the dbt model or adjusting your assumptions/tests?
-Apply these changes to your github repo
-Your stakeholders at Greenery want to understand the state of the data each day. Explain how you would ensure these tests are passing regularly and how you would alert stakeholders about bad data getting through.
+
+
+
+# (Part 2) Tests
+I adeded schema tests to check for not null and uniqueness. What is surprising that there are orders (with promo codes used) wihout creation timestamp which sounds weird, but perhaps they are placed through phone, if possible, so I didn't clean them. 
+
+
+# Data quality
+Schema tests are applied every time with every build, so we would get alerted when something unusual happens.

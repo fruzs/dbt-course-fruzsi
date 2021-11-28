@@ -1,0 +1,59 @@
+
+version: 2
+
+models:
+  - name: dim_promo
+    description: "Promotion Dimensions"
+    columns:
+      - name: promo_id
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
+      - name: discount
+        descripiton: "The percentage applied as discount with the promotion"
+        tests:
+          - not_null
+      - name: promo_status
+        description: "The status of the promotion"
+  - name: fct_promo_usage_daily
+    description: "Facts around how many orders use promo code"
+    columns:
+      - name: primary_key
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
+      - name: promo_id
+        description: "The identifier of the promotion"
+        tests:
+          - not_null
+      - name: usage_date
+        description: "When the promo usage happened"
+      - name: orders_w_promo
+        description: "Number of orders with usage"
+        tests:
+          - not_null
+  - name: fct_user_order
+    description: "One row per user and their order"
+    columns:
+      - name: user_id
+        description: "User id, the primary key for this table"
+        tests:
+          - unique
+          - not_null
+      - name: user_created_at
+        description: "The timestamp when the user was created"
+        tests:
+          - not_null
+      - name: first_order_at
+        description: "The timestamp when the first order was created"
+      - name: time_to_fist_order
+        description: "The time interval to the first order"
+        tests: 
+      - name: number_of_orders
+        description: "The total number of orders the user created"
+      - name: number_of_order_w_promo
+        description: "The total number of orders the user created where they used promo code"
+      - name: lifetime_revenue
+        description: "how much revenue the user orders generated"

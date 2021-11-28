@@ -1,0 +1,116 @@
+
+version: 2
+
+models:
+  - name: dim_order
+    description: "Dimensions around orders"
+    columns:
+      - name: order_id
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
+      - name: order_created_at
+        description: "The timestamp when the order was placed"
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'IS NULL'
+              condition: order_status = 'pending'
+      - name: user_id
+        description: "The identifier of the user that placed the order"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_user')
+              field: user_id
+      - name: promo_id
+        description: "The id of the promotion if it is used at checkout"
+        tests:
+          - relationships:
+              to: ref('stg_promo')
+              field: promo_id
+      - name: order_status
+        description: "The current status of the order"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['shipped', 'pending', 'preparing', 'delivered']
+      - name: shipping_service
+        description: "The shipping service"
+        tests:
+          - not_null:
+              config:
+                where: "order_status NOT IN ('pending', 'preparing')"
+          - accepted_values:
+              values: ['fedex', 'ups', 'dhl', 'usps', NULL]
+      - name: delivered_at
+        description: "WHen the order was delivered"
+  - name: fct_order
+    description: "Facts around orders"
+    columns:
+      - name: order_id
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
+      - name: order_cost
+        description: "Order amount without shipping costs"
+        tests:
+          - not_null
+      - name: shipping_cost
+        description: "How much the user pays for the shipping"
+        tests:
+        - not_null
+      - name: order_total
+        description: "How much the user pays for the order and shipping together"
+        tests:
+        - not_null
+  - name: dim_product
+    description: "Product dimensions, one row per product"
+    columns:
+      - name: product_id
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
+      - name: product_name
+        description: "The name of the product"
+        tests:
+          - not_null
+  - name: dim_user
+    description: "User dimensions, one row per user"
+    columns:
+      - name: user_id
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
+      - name: user_created_at
+        description:  "The timestamp of the user created"
+        tests:
+          - not_null
+      - name: user_updated_at
+        description:  "The timestamp of the last update to the user"
+      - name: zipcode
+        description: "The zipcode where the user is located."
+      - name: state
+        description: "The state where the user is located."
+      - name: country
+        description: "The country where the user is located"
+  - name: int_sold_product_daily
+    description: "This table is a summary for each day, how many products are sold, one row per day per product"
+    columns:
+      - name: primary_key
+        tests:
+          - unique
+          - not_null
+      - name: product_id
+        description: "The product id that is sold"
+        tests:
+          - not_null
+      - name: order_date
+        description: "The date when the product is sold"
+        tests:
+          - not_null
+      - name: sold_quantity
+        descripiton: "How many times the product is sold"
