@@ -11,5 +11,5 @@ SELECT   event_id,
   session_id,
   user_id,
   page_url
-FROM {{ref('stg_event_log')}}
+FROM {{ref('int_event_log')}}
 WHERE event_type = 'page_view'

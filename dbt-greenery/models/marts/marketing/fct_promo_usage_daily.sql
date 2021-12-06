@@ -1,7 +1,7 @@
 {{
     config(
         materialized='incremental',
-        unique_key=['promo_id', 'order_date']
+        unique_key='primary_key'
     )
 }}
 WITH base AS (
