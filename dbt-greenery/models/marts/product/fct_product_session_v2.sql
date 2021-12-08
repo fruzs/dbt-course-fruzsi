@@ -13,7 +13,7 @@ WITH
 
     {% for event_type in event_types %}
       {{event_type}}_table AS (
-      {{funnel_step(event_type,int_event_log)}})
+      {{funnel_step(event_type, ref('int_event_log')  )}})
       ,
     {% endfor %}
 
