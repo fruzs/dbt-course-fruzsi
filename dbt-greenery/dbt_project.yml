@@ -36,3 +36,9 @@ models:
     # Config indicated by + and applies to all files under models/example/
     example:
       +materialized: view
+
+  post-hook: #this gives access after table built?
+    - "GRANT SELECT ON {{ this }} TO reporting"
+
+on-run-end:  #this gives access after table dag run?
+  - "GRANT USAGE ON SCHEMA {{ schema }} TO reporting"
