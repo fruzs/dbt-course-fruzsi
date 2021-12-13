@@ -13,7 +13,8 @@ WITH base AS (
     user_id, 
     page_url, 
     event_type,
-    regexp_split_to_array(page_url, '/') as url_array
+    regexp_split_to_array(page_url, '/') as url_array,
+    row_number() OVER (PARTITION BY user_id ORDER BY event_created_at) AS rn
   FROM {{ ref('stg_event_log')}})
 
 SELECT 
